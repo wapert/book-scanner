@@ -252,11 +252,14 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
           ]),
         ),
 
-        // Full photo (local temp file for preview)
+        // Full photo (local temp file for preview).
+        // cacheWidth downsamples the decode so a very high-resolution capture
+        // does not load a huge bitmap into memory just to preview it.
         Expanded(
           child: Image.file(
             File(_previewPath!),
             fit: BoxFit.contain,
+            cacheWidth: 1280,
             width: double.infinity,
           ),
         ),

@@ -83,7 +83,7 @@ class _PageDetailScreenState extends State<PageDetailScreen> {
     }
     final file = File(widget.page.photoUrl);
     return file.existsSync()
-        ? Image.file(file, fit: BoxFit.contain)
+        ? Image.file(file, fit: BoxFit.contain, cacheWidth: 1280)
         : const Icon(Icons.broken_image);
   }
 
