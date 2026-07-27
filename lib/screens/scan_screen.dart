@@ -2,10 +2,13 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../models/page_item.dart';
+import '../services/image_service.dart';
+import '../services/ocr_service.dart';
 import '../services/photo_service.dart';
 
-/// Camera screen. Returns the Firebase Storage download URL on success,
-/// or null if the user cancels.
+/// Camera screen. Returns a [PageItem] (compressed photo URL + OCR text) on
+/// success, or null if the user cancels.
 class ScanScreen extends StatefulWidget {
   final String bookId;
   const ScanScreen({super.key, required this.bookId});
@@ -20,6 +23,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   bool _capturing = false;
   bool _uploading = false;
   double _uploadProgress = 0;
+  String _statusText = '';
 
   /// Local temp path from the camera (preview state).
   String? _previewPath;
@@ -95,24 +99,44 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ── Confirm: upload to Firebase Storage ───────────────────────────────────
+  // ── Confirm: compress → OCR → upload ──────────────────────────────────────
 
   Future<void> _confirm() async {
     if (_previewPath == null || _uploading) return;
-    setState(() { _uploading = true; _uploadProgress = 0; });
+    setState(() {
+      _uploading = true;
+      _uploadProgress = 0;
+      _statusText = 'Compressing…';
+    });
     try {
+      // 1. Compress (resize + JPEG) off the UI thread.
+      final compressed = await ImageService.compress(_previewPath!);
+
+      // 2. On-device OCR (Android only). Failures here are non-fatal — the
+      //    user can re-run OCR later from the page screen.
+      String text = '';
+      if (OcrService.isSupported) {
+        if (mounted) setState(() => _statusText = 'Recognizing text…');
+        try {
+          text = await OcrService.recognizeFile(compressed);
+        } catch (_) {}
+      }
+
+      // 3. Upload the compressed image.
+      if (mounted) setState(() => _statusText = 'Uploading…');
       final url = await PhotoService.uploadPhoto(
-        _previewPath!,
+        compressed,
         widget.bookId,
         onProgress: (p) {
           if (mounted) setState(() => _uploadProgress = p);
         },
       );
-      if (mounted) Navigator.pop(context, url);
+
+      if (mounted) Navigator.pop(context, PageItem(photoUrl: url, text: text));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+            .showSnackBar(SnackBar(content: Text('Failed: $e')));
         setState(() => _uploading = false);
       }
     }
@@ -273,19 +297,21 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
             color: Colors.black54,
             child: Center(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const Text('Uploading…',
-                    style: TextStyle(color: Colors.white, fontSize: 16)),
+                Text(_statusText.isEmpty ? 'Working…' : _statusText,
+                    style: const TextStyle(color: Colors.white, fontSize: 16)),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: 200,
                   child: LinearProgressIndicator(
-                    value: _uploadProgress > 0 ? _uploadProgress : null,
+                    value: (_statusText == 'Uploading…' && _uploadProgress > 0)
+                        ? _uploadProgress
+                        : null,
                     color: const Color(0xFF1565C0),
                     backgroundColor: Colors.white24,
                   ),
                 ),
                 const SizedBox(height: 8),
-                if (_uploadProgress > 0)
+                if (_statusText == 'Uploading…' && _uploadProgress > 0)
                   Text(
                     '${(_uploadProgress * 100).toStringAsFixed(0)}%',
                     style: const TextStyle(color: Colors.white70, fontSize: 13),

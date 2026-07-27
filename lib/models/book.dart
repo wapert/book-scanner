@@ -1,16 +1,17 @@
+import 'page_item.dart';
+
 class Book {
   final String id;
   String name;
   final DateTime createdAt;
 
-  /// Each entry is an absolute path to a saved JPEG photo.
-  List<String> pages;
+  List<PageItem> pages;
 
   Book({
     required this.id,
     required this.name,
     required this.createdAt,
-    List<String>? pages,
+    List<PageItem>? pages,
   }) : pages = pages ?? [];
 
   factory Book.create(String name) => Book(
@@ -22,20 +23,28 @@ class Book {
   factory Book.fromJson(Map<String, dynamic> j) {
     final rawPages = (j['pages'] as List?) ?? [];
 
-    // Migration: previous versions stored strings (OCR text) or PageData
-    // objects. Extract the photoPath where possible; skip text-only entries.
+    // Migration across formats:
+    //  - PageItem map  {photoUrl, text}       ← current
+    //  - String URL/path                       ← photo-only build
+    //  - {photoPath: ...}                       ← very old build
+    //  - OCR text string (no scheme)            ← oldest build, discarded
     final pages = rawPages
-        .map((p) {
+        .map<PageItem?>((p) {
           if (p is Map) {
-            // PageData format from previous build
-            return (p['photoPath'] as String?) ?? '';
+            final map = Map<String, dynamic>.from(p);
+            if (map['photoUrl'] != null) return PageItem.fromJson(map);
+            final legacyPath = map['photoPath'] as String?;
+            if (legacyPath != null && legacyPath.isNotEmpty) {
+              return PageItem(photoUrl: legacyPath);
+            }
+            return null;
           }
           if (p is String && (p.startsWith('/') || p.startsWith('http'))) {
-            return p;
+            return PageItem(photoUrl: p);
           }
-          return ''; // OCR text from old build — discard
+          return null;
         })
-        .where((s) => s.isNotEmpty)
+        .whereType<PageItem>()
         .toList();
 
     return Book(
@@ -50,6 +59,6 @@ class Book {
         'id': id,
         'name': name,
         'createdAt': createdAt.toIso8601String(),
-        'pages': pages,
+        'pages': pages.map((p) => p.toJson()).toList(),
       };
 }
