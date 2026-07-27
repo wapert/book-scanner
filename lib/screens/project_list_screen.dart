@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/project.dart';
 import '../services/auth_service.dart';
+import '../services/photo_service.dart';
 import '../services/storage_service.dart';
 import '../utils/dialogs.dart';
 import 'project_detail_screen.dart';
@@ -118,6 +119,94 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     }
   }
 
+  // ── Delete account (Apple requires in-app deletion) ────────────────────────
+
+  Future<void> _deleteAccount() async {
+    final passCtrl = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This permanently deletes your account and ALL of your projects, '
+              'books, pages, photos, and recognized text. This cannot be undone.\n\n'
+              'Enter your password to confirm.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: passCtrl,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete forever',
+                style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (passCtrl.text.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password required to delete account')),
+        );
+      }
+      return;
+    }
+
+    // Progress dialog
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const AlertDialog(
+          content: Row(children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 16),
+            Expanded(child: Text('Deleting your account…')),
+          ]),
+        ),
+      );
+    }
+
+    try {
+      // 1. Re-authenticate (Firebase requires a recent login to delete).
+      await AuthService.reauthenticate(passCtrl.text);
+      // 2. Delete cloud data while still authenticated.
+      await PhotoService.deleteAllUserFiles();
+      await StorageService.deleteAllData();
+      // 3. Delete the auth account last. authStateChanges → back to AuthScreen.
+      await AuthService.deleteAccount();
+      // No navigation needed: the StreamBuilder in main.dart swaps to AuthScreen.
+    } catch (e) {
+      if (mounted) Navigator.pop(context); // close progress dialog
+      if (mounted) {
+        final msg = e.toString().contains('wrong-password') ||
+                e.toString().contains('invalid-credential')
+            ? 'Incorrect password. Account not deleted.'
+            : 'Could not delete account: $e';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), duration: const Duration(seconds: 6)),
+        );
+      }
+    }
+  }
+
   // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
@@ -135,6 +224,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
               tooltip: 'Account',
               onSelected: (v) async {
                 if (v == 'signout') await AuthService.signOut();
+                if (v == 'delete') await _deleteAccount();
               },
               itemBuilder: (_) => [
                 PopupMenuItem(
@@ -151,6 +241,15 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                     Icon(Icons.logout, size: 18),
                     SizedBox(width: 8),
                     Text('Sign Out'),
+                  ]),
+                ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(children: [
+                    Icon(Icons.delete_forever, size: 18, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Delete account',
+                        style: TextStyle(color: Colors.red)),
                   ]),
                 ),
               ],

@@ -36,4 +36,19 @@ class PhotoService {
       await ref.delete();
     } catch (_) {}
   }
+
+  /// Deletes ALL of the current user's stored files. Used by account deletion.
+  static Future<void> deleteAllUserFiles() async {
+    await _deleteRecursive(_storage.ref('users/$_uid'));
+  }
+
+  static Future<void> _deleteRecursive(Reference ref) async {
+    final result = await ref.listAll();
+    for (final item in result.items) {
+      try { await item.delete(); } catch (_) {}
+    }
+    for (final prefix in result.prefixes) {
+      await _deleteRecursive(prefix);
+    }
+  }
 }

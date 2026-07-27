@@ -20,6 +20,17 @@ class StorageService {
         .toList();
   }
 
+  /// Deletes every project document for the current user. Used by account
+  /// deletion. Must run while the user is still authenticated.
+  static Future<void> deleteAllData() async {
+    final snap = await _col.get();
+    final batch = _db.batch();
+    for (final doc in snap.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+  }
+
   static Future<void> saveProjects(List<Project> projects) async {
     final batch = _db.batch();
     final currentIds = projects.map((p) => p.id).toSet();

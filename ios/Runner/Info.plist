@@ -4,6 +4,8 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Book Scanner uses the camera to photograph book pages so you can save and organize them.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
