@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/book.dart';
 import '../models/project.dart';
 import '../services/pdf_exporter.dart';
@@ -100,13 +101,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     try {
       final file = await PdfExporter.export(_book.pages, _book.name);
       if (!mounted) return;
+      final saveLocation = Platform.isMacOS
+          ? '~/Downloads/BookScanner'
+          : 'Documents/BookScanner';
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('PDF saved!'),
           content: Text(
             '"${_book.name}.pdf"\n'
-            '${_book.pages.length} page(s) saved to Documents/BookScanner',
+            '${_book.pages.length} page(s) saved to $saveLocation',
           ),
           actions: [
             TextButton(

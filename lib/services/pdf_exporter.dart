@@ -23,7 +23,7 @@ class PdfExporter {
     }
 
     final safeName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_').trim();
-    final dir = await StorageService.baseDir();
+    final dir = await StorageService.exportDir();
     final file = File('${dir.path}/$safeName.pdf');
     await file.writeAsBytes(await doc.save());
     return file;
