@@ -1,10 +1,11 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:path_provider/path_provider.dart';
 import '../models/book.dart';
 import '../models/project.dart';
 import '../services/pdf_exporter.dart';
+import '../services/photo_service.dart';
 import '../services/storage_service.dart';
 import 'scan_screen.dart';
 
@@ -32,15 +33,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   // ── Scan a new page ────────────────────────────────────────────────────────
 
   Future<void> _scanPage() async {
-    final photoPath = await Navigator.push<String>(
+    final url = await Navigator.push<String>(
       context,
       MaterialPageRoute(
         builder: (_) => ScanScreen(bookId: _book.id),
       ),
     );
-    if (photoPath == null) return;
+    if (url == null) return;
 
-    setState(() => _book.pages.add(photoPath));
+    setState(() => _book.pages.add(url));
     await _save();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,17 +64,23 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               child: const Text('Cancel')),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child:
-                const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
     if (ok != true) return;
-    // Delete the photo file from storage
-    try { await File(_book.pages[index]).delete(); } catch (_) {}
+
+    final path = _book.pages[index];
     setState(() => _book.pages.removeAt(index));
     await _save();
+
+    // Delete from Firebase Storage (URL) or local file system
+    if (path.startsWith('http')) {
+      await PhotoService.deletePhoto(path);
+    } else {
+      try { await File(path).delete(); } catch (_) {}
+    }
   }
 
   // ── View full-screen ───────────────────────────────────────────────────────
@@ -101,9 +108,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     try {
       final file = await PdfExporter.export(_book.pages, _book.name);
       if (!mounted) return;
-      final saveLocation = Platform.isMacOS
-          ? '~/Downloads/BookScanner'
-          : 'Documents/BookScanner';
+      final saveLocation =
+          Platform.isMacOS ? '~/Downloads/BookScanner' : 'Documents/BookScanner';
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -165,23 +171,19 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.document_scanner,
-                      size: 72, color: Colors.grey[400]),
+                  Icon(Icons.document_scanner, size: 72, color: Colors.grey[400]),
                   const SizedBox(height: 16),
                   Text(
                     'No pages yet.\nTap the button below to scan the first page.',
                     textAlign: TextAlign.center,
-                    style:
-                        TextStyle(color: Colors.grey[600], fontSize: 16),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
                   ),
                 ],
               ),
             )
-          // Grid view — tap to view, long-press for options
           : GridView.builder(
               padding: const EdgeInsets.all(8),
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
@@ -206,6 +208,33 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   }
 }
 
+// ── Shared image widget ────────────────────────────────────────────────────────
+
+Widget _photoWidget(String path, {BoxFit fit = BoxFit.cover}) {
+  if (path.startsWith('http')) {
+    return CachedNetworkImage(
+      imageUrl: path,
+      fit: fit,
+      placeholder: (_, __) => Container(
+        color: Colors.grey[200],
+        child: const Center(
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+      errorWidget: (_, __, ___) => Container(
+        color: Colors.grey[300],
+        child: const Icon(Icons.broken_image),
+      ),
+    );
+  }
+  final file = File(path);
+  return file.existsSync()
+      ? Image.file(file, fit: fit)
+      : Container(
+          color: Colors.grey[300],
+          child: const Icon(Icons.broken_image));
+}
+
 // ── Page grid tile ────────────────────────────────────────────────────────────
 
 class _PageTile extends StatelessWidget {
@@ -223,7 +252,6 @@ class _PageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(path);
     return GestureDetector(
       onTap: onTap,
       onLongPress: () => showModalBottomSheet(
@@ -250,11 +278,7 @@ class _PageTile extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Stack(fit: StackFit.expand, children: [
-          file.existsSync()
-              ? Image.file(file, fit: BoxFit.cover)
-              : Container(color: Colors.grey[300],
-                  child: const Icon(Icons.broken_image)),
-          // Page number badge
+          _photoWidget(path),
           Positioned(
             top: 6, left: 6,
             child: Container(
@@ -288,8 +312,7 @@ class _FullscreenPhotoScreen extends StatefulWidget {
       {required this.paths, required this.initialIndex});
 
   @override
-  State<_FullscreenPhotoScreen> createState() =>
-      _FullscreenPhotoScreenState();
+  State<_FullscreenPhotoScreen> createState() => _FullscreenPhotoScreenState();
 }
 
 class _FullscreenPhotoScreenState extends State<_FullscreenPhotoScreen> {
@@ -316,10 +339,8 @@ class _FullscreenPhotoScreenState extends State<_FullscreenPhotoScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(
-          'Page ${_current + 1} of ${widget.paths.length}',
-          style: const TextStyle(color: Colors.white),
-        ),
+        title: Text('Page ${_current + 1} of ${widget.paths.length}',
+            style: const TextStyle(color: Colors.white)),
       ),
       body: PageView.builder(
         controller: _pageCtrl,
@@ -327,10 +348,7 @@ class _FullscreenPhotoScreenState extends State<_FullscreenPhotoScreen> {
         onPageChanged: (i) => setState(() => _current = i),
         itemBuilder: (ctx, i) => InteractiveViewer(
           child: Center(
-            child: Image.file(
-              File(widget.paths[i]),
-              fit: BoxFit.contain,
-            ),
+            child: _photoWidget(widget.paths[i], fit: BoxFit.contain),
           ),
         ),
       ),

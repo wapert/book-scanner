@@ -1,13 +1,11 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../services/photo_service.dart';
 
-/// Camera screen. Returns the permanent [String] photo path on success,
+/// Camera screen. Returns the Firebase Storage download URL on success,
 /// or null if the user cancels.
-///
-/// [bookId] is used to organise photos into per-book folders.
 class ScanScreen extends StatefulWidget {
   final String bookId;
   const ScanScreen({super.key, required this.bookId});
@@ -20,8 +18,10 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   CameraController? _controller;
   bool _initialized = false;
   bool _capturing = false;
+  bool _uploading = false;
+  double _uploadProgress = 0;
 
-  /// If not null we are showing the photo-preview state.
+  /// Local temp path from the camera (preview state).
   String? _previewPath;
 
   @override
@@ -95,22 +95,30 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ── Confirm: copy temp file to permanent storage ───────────────────────────
+  // ── Confirm: upload to Firebase Storage ───────────────────────────────────
 
   Future<void> _confirm() async {
-    if (_previewPath == null) return;
+    if (_previewPath == null || _uploading) return;
+    setState(() { _uploading = true; _uploadProgress = 0; });
     try {
-      final permanent = await _savePermanently(_previewPath!, widget.bookId);
-      if (mounted) Navigator.pop(context, permanent);
+      final url = await PhotoService.uploadPhoto(
+        _previewPath!,
+        widget.bookId,
+        onProgress: (p) {
+          if (mounted) setState(() => _uploadProgress = p);
+        },
+      );
+      if (mounted) Navigator.pop(context, url);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Save failed: $e')));
+            .showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+        setState(() => _uploading = false);
       }
     }
   }
 
-  void _retake() => setState(() => _previewPath = null);
+  void _retake() => setState(() { _previewPath = null; _uploading = false; });
 
   // ── Build ──────────────────────────────────────────────────────────────────
 
@@ -119,9 +127,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: _previewPath != null
-            ? _buildPreview()
-            : _buildCamera(),
+        child: _previewPath != null ? _buildPreview() : _buildCamera(),
       ),
     );
   }
@@ -130,7 +136,6 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
 
   Widget _buildCamera() {
     return Stack(children: [
-      // Preview
       if (_initialized && _controller != null)
         Positioned.fill(child: CameraPreview(_controller!))
       else
@@ -138,12 +143,10 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             CircularProgressIndicator(color: Colors.white),
             SizedBox(height: 12),
-            Text('Starting camera…',
-                style: TextStyle(color: Colors.white)),
+            Text('Starting camera…', style: TextStyle(color: Colors.white)),
           ]),
         ),
 
-      // Top bar
       Positioned(
         top: 0, left: 0, right: 0,
         child: Container(
@@ -163,7 +166,6 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
         ),
       ),
 
-      // Bottom bar
       Positioned(
         bottom: 0, left: 0, right: 0,
         child: Container(
@@ -185,8 +187,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
                     color: const Color(0xFF1565C0),
                     border: Border.all(color: Colors.white, width: 3),
                   ),
-                  child: const Icon(Icons.camera_alt,
-                      color: Colors.white, size: 32),
+                  child: const Icon(Icons.camera_alt, color: Colors.white, size: 32),
                 ),
               ),
           ]),
@@ -198,87 +199,101 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   // ── Photo preview view ─────────────────────────────────────────────────────
 
   Widget _buildPreview() {
-    return Column(children: [
-      // Toolbar
-      Container(
-        color: Colors.black,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(children: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            tooltip: 'Retake',
-            onPressed: _retake,
-          ),
-          const Expanded(
-            child: Text('Use this photo?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold)),
-          ),
-          IconButton(
-            icon: const Icon(Icons.check_circle,
-                color: Colors.greenAccent, size: 32),
-            tooltip: 'Add to book',
-            onPressed: _confirm,
-          ),
-        ]),
-      ),
-
-      // Full photo
-      Expanded(
-        child: Image.file(
-          File(_previewPath!),
-          fit: BoxFit.contain,
-          width: double.infinity,
-        ),
-      ),
-
-      // Action buttons
-      Container(
-        color: Colors.black87,
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
-        child: Row(children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: _retake,
+    return Stack(children: [
+      Column(children: [
+        // Toolbar
+        Container(
+          color: Colors.black,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(children: [
+            IconButton(
               icon: const Icon(Icons.refresh, color: Colors.white),
-              label: const Text('Retake',
-                  style: TextStyle(color: Colors.white)),
-              style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white54)),
+              tooltip: 'Retake',
+              onPressed: _uploading ? null : _retake,
+            ),
+            const Expanded(
+              child: Text('Use this photo?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+            ),
+            IconButton(
+              icon: const Icon(Icons.check_circle,
+                  color: Colors.greenAccent, size: 32),
+              tooltip: 'Add to book',
+              onPressed: _uploading ? null : _confirm,
+            ),
+          ]),
+        ),
+
+        // Full photo (local temp file for preview)
+        Expanded(
+          child: Image.file(
+            File(_previewPath!),
+            fit: BoxFit.contain,
+            width: double.infinity,
+          ),
+        ),
+
+        // Action buttons
+        Container(
+          color: Colors.black87,
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+          child: Row(children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _uploading ? null : _retake,
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                label: const Text('Retake',
+                    style: TextStyle(color: Colors.white)),
+                style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white54)),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: _uploading ? null : _confirm,
+                icon: const Icon(Icons.cloud_upload),
+                label: const Text('Add to Book'),
+                style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF1565C0)),
+              ),
+            ),
+          ]),
+        ),
+      ]),
+
+      // Upload overlay
+      if (_uploading)
+        Positioned.fill(
+          child: Container(
+            color: Colors.black54,
+            child: Center(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Text('Uploading…',
+                    style: TextStyle(color: Colors.white, fontSize: 16)),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: 200,
+                  child: LinearProgressIndicator(
+                    value: _uploadProgress > 0 ? _uploadProgress : null,
+                    color: const Color(0xFF1565C0),
+                    backgroundColor: Colors.white24,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (_uploadProgress > 0)
+                  Text(
+                    '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+              ]),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: _confirm,
-              icon: const Icon(Icons.check),
-              label: const Text('Add to Book'),
-              style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF1565C0)),
-            ),
-          ),
-        ]),
-      ),
+        ),
     ]);
   }
-}
-
-// ── Save photo to permanent location ─────────────────────────────────────────
-
-Future<String> _savePermanently(String tempPath, String bookId) async {
-  Directory base;
-  if (Platform.isAndroid) {
-    base = (await getExternalStorageDirectory())!;
-  } else {
-    base = await getApplicationDocumentsDirectory();
-  }
-  final dir = Directory('${base.path}/BookScanner/photos/$bookId');
-  await dir.create(recursive: true);
-  final dest = File(
-      '${dir.path}/page_${DateTime.now().millisecondsSinceEpoch}.jpg');
-  await File(tempPath).copy(dest.path);
-  return dest.path;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/project.dart';
+import '../services/auth_service.dart';
 import '../services/storage_service.dart';
 import '../utils/dialogs.dart';
 import 'project_detail_screen.dart';
@@ -98,6 +99,36 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
         title: const Text('Book Scanner'),
         backgroundColor: const Color(0xFF1565C0),
         foregroundColor: Colors.white,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: PopupMenuButton<String>(
+              icon: const Icon(Icons.account_circle, color: Colors.white),
+              tooltip: 'Account',
+              onSelected: (v) async {
+                if (v == 'signout') await AuthService.signOut();
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  enabled: false,
+                  child: Text(
+                    AuthService.currentUser?.email ?? '',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'signout',
+                  child: Row(children: [
+                    Icon(Icons.logout, size: 18),
+                    SizedBox(width: 8),
+                    Text('Sign Out'),
+                  ]),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

@@ -30,8 +30,7 @@ class Book {
             // PageData format from previous build
             return (p['photoPath'] as String?) ?? '';
           }
-          if (p is String && p.startsWith('/')) {
-            // Already a file path
+          if (p is String && (p.startsWith('/') || p.startsWith('http'))) {
             return p;
           }
           return ''; // OCR text from old build — discard

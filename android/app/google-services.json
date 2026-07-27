@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "677302127068",
+    "project_id": "book-scanner-b550d",
+    "storage_bucket": "book-scanner-b550d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:677302127068:android:487c4669fb95e43e67a719",
+        "android_client_info": {
+          "package_name": "com.bookscanner.bookscanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "677302127068-i28hol54dorndahedkins07e04p7cd6o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAjtyAohQhfIRK5KRB4L9jjwv32NoqRBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "677302127068-i28hol54dorndahedkins07e04p7cd6o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

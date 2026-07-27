@@ -1,27 +1,49 @@
-import 'dart:convert';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/project.dart';
 
 class StorageService {
-  static const _dataFile = 'projects.json';
+  static FirebaseFirestore get _db => FirebaseFirestore.instance;
+  static String get _uid => FirebaseAuth.instance.currentUser!.uid;
 
-  /// Base directory for app data (projects.json, photos).
-  static Future<Directory> baseDir() async {
-    final Directory base;
-    if (Platform.isAndroid) {
-      base = (await getExternalStorageDirectory())!;
-    } else {
-      base = await getApplicationDocumentsDirectory();
-    }
-    final dir = Directory('${base.path}/BookScanner');
-    await dir.create(recursive: true);
-    return dir;
+  static CollectionReference<Map<String, dynamic>> get _col =>
+      _db.collection('users').doc(_uid).collection('projects');
+
+  // ── Firestore CRUD ─────────────────────────────────────────────────────────
+
+  static Future<List<Project>> loadProjects() async {
+    final snap = await _col.orderBy('createdAt', descending: true).get();
+    return snap.docs
+        .map((d) => Project.fromJson(d.data()))
+        .toList();
   }
 
-  /// Directory where exported PDFs are saved.
-  /// On macOS: ~/Downloads/BookScanner — visible to the user.
-  /// On Android: same as baseDir (external storage).
+  static Future<void> saveProjects(List<Project> projects) async {
+    final batch = _db.batch();
+    final currentIds = projects.map((p) => p.id).toSet();
+
+    // Remove deleted projects
+    final existing = await _col.get();
+    for (final doc in existing.docs) {
+      if (!currentIds.contains(doc.id)) {
+        batch.delete(doc.reference);
+      }
+    }
+
+    // Upsert all current projects
+    for (final p in projects) {
+      batch.set(_col.doc(p.id), p.toJson());
+    }
+
+    await batch.commit();
+  }
+
+  // ── Local export directory (for PDFs) ─────────────────────────────────────
+
+  /// Returns the directory where PDFs are exported.
+  /// macOS → ~/Downloads/BookScanner, Android → external storage/BookScanner.
   static Future<Directory> exportDir() async {
     if (Platform.isMacOS) {
       final downloads = await getDownloadsDirectory();
@@ -29,31 +51,9 @@ class StorageService {
       await dir.create(recursive: true);
       return dir;
     }
-    return baseDir();
-  }
-
-  static Future<File> _file() async {
-    final dir = await baseDir();
-    return File('${dir.path}/$_dataFile');
-  }
-
-  static Future<List<Project>> loadProjects() async {
-    final file = await _file();
-    if (!await file.exists()) return [];
-    try {
-      final list = jsonDecode(await file.readAsString()) as List;
-      return list
-          .map((j) => Project.fromJson(j as Map<String, dynamic>))
-          .toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  static Future<void> saveProjects(List<Project> projects) async {
-    final file = await _file();
-    await file.writeAsString(
-      jsonEncode(projects.map((p) => p.toJson()).toList()),
-    );
+    final ext = await getExternalStorageDirectory();
+    final dir = Directory('${ext!.path}/BookScanner');
+    await dir.create(recursive: true);
+    return dir;
   }
 }
