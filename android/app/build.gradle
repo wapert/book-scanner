@@ -54,3 +54,10 @@ android {
 flutter {
     source "../.."
 }
+
+dependencies {
+    // ML Kit's Flutter plugin bundles only the Latin recognizer by default.
+    // The Chinese script model (which also reads Latin) needs its own native
+    // library, or TextRecognizer(script: chinese) throws NoClassDefFoundError.
+    implementation 'com.google.mlkit:text-recognition-chinese:16.0.1'
+}
