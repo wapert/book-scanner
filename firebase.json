@@ -1,1 +1,36 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"book-scanner-b550d","appId":"1:677302127068:android:487c4669fb95e43e67a719","fileOutput":"android/app/google-services.json"}},"macos":{"default":{"projectId":"book-scanner-b550d","appId":"1:677302127068:ios:be01b0c22d948ea367a719","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"book-scanner-b550d","configurations":{"android":"1:677302127068:android:487c4669fb95e43e67a719","macos":"1:677302127068:ios:be01b0c22d948ea367a719"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "book-scanner-b550d",
+          "appId": "1:677302127068:android:487c4669fb95e43e67a719",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "book-scanner-b550d",
+          "appId": "1:677302127068:ios:be01b0c22d948ea367a719",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "book-scanner-b550d",
+          "configurations": {
+            "android": "1:677302127068:android:487c4669fb95e43e67a719",
+            "macos": "1:677302127068:ios:be01b0c22d948ea367a719"
+          }
+        }
+      }
+    }
+  }
+}

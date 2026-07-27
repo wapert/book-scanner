@@ -25,11 +25,34 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    _projects = await StorageService.loadProjects();
-    if (mounted) setState(() => _loading = false);
+    try {
+      _projects = await StorageService.loadProjects();
+    } catch (e) {
+      if (mounted) _showError('Could not load projects', e);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
-  Future<void> _save() => StorageService.saveProjects(_projects);
+  /// Saves to Firestore. Returns true on success, false (with a message) on error.
+  Future<bool> _save() async {
+    try {
+      await StorageService.saveProjects(_projects);
+      return true;
+    } catch (e) {
+      if (mounted) _showError('Could not save to the cloud', e);
+      return false;
+    }
+  }
+
+  void _showError(String what, Object e) {
+    final msg = e.toString().contains('permission-denied')
+        ? '$what: permission denied. Check your Firestore security rules.'
+        : '$what: $e';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), duration: const Duration(seconds: 6)),
+    );
+  }
 
   // ── Create project ─────────────────────────────────────────────────────────
 
@@ -39,7 +62,12 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     if (name == null) return;
     final project = Project.create(name);
     setState(() => _projects.add(project));
-    await _save();
+    final ok = await _save();
+    if (!ok) {
+      // Roll back the optimistic add so the list matches the cloud.
+      setState(() => _projects.remove(project));
+      return;
+    }
     if (mounted) {
       Navigator.push(
         context,
