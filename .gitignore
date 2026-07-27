@@ -32,3 +32,12 @@ stock_app2/
 # Sensitive / generated
 *.env
 *.log
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+**/*.mode1v3
+**/*.mode2v3
+**/*.pbxuser

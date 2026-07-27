@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
@@ -58,6 +55,16 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyC02ya_CqG1X_sMfv2JWX1BmMbsmqtUDRQ',
+    appId: '1:677302127068:ios:be01b0c22d948ea367a719',
+    messagingSenderId: '677302127068',
+    projectId: 'book-scanner-b550d',
+    storageBucket: 'book-scanner-b550d.firebasestorage.app',
+    iosClientId: '677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com',
+    iosBundleId: 'com.bookscanner.bookScanner',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyC02ya_CqG1X_sMfv2JWX1BmMbsmqtUDRQ',
     appId: '1:677302127068:ios:be01b0c22d948ea367a719',
     messagingSenderId: '677302127068',
