@@ -73,4 +73,4 @@ by the "Last updated" date above.
 ## Contact
 
 For privacy questions or data-deletion requests, contact:
-**<your-support-email@example.com>**
+**wapertech@gmail.com**
