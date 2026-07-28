@@ -25,7 +25,7 @@ Ordered so you can work top to bottom.
 
 - [ ] Sign in to **App Store Connect** (https://appstoreconnect.apple.com) with
       your Developer account.
-- [ ] **Bundle ID** is `com.bookscanner.bookScanner` (already set in the Xcode
+- [ ] **Bundle ID** is `com.wapertech.bookscanner` (already set in the Xcode
       project). Register it at
       Developer → Certificates, IDs & Profiles → Identifiers (or let Xcode
       auto-create it during the first archive).
@@ -45,7 +45,7 @@ Ordered so you can work top to bottom.
       - **Team:** select team `NR6H8UUF43`. This matches the TeamIdentifier in
         the archive's embedded provisioning profile. (`U38KEH9A34` appears in
         the certificate label but is not the provisioning TeamIdentifier.)
-      - Confirm the bundle identifier matches `com.bookscanner.bookScanner`
+      - Confirm the bundle identifier matches `com.wapertech.bookscanner`
 - [ ] Firebase requires no extra capability here. (Push notifications are NOT
       used, so no APNs setup needed.)
 
@@ -81,7 +81,7 @@ Local verification completed:
 - [x] Unsigned iOS release build succeeds.
 - [x] Signed Xcode archive succeeds and passes app-settings validation.
 - [ ] IPA export currently requires registering
-      `com.bookscanner.bookScanner` and creating an App Store provisioning
+      `com.wapertech.bookscanner` and creating an App Store provisioning
       profile for team `NR6H8UUF43`.
 
 ## 6. Upload

@@ -53,26 +53,23 @@ class DefaultFirebaseOptions {
     projectId: 'book-scanner-b550d',
     storageBucket: 'book-scanner-b550d.firebasestorage.app',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyC02ya_CqG1X_sMfv2JWX1BmMbsmqtUDRQ',
     appId: '1:677302127068:ios:be01b0c22d948ea367a719',
     messagingSenderId: '677302127068',
     projectId: 'book-scanner-b550d',
     storageBucket: 'book-scanner-b550d.firebasestorage.app',
-    iosClientId:
-        '677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com',
+    iosClientId: '677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com',
     iosBundleId: 'com.bookscanner.bookScanner',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyC02ya_CqG1X_sMfv2JWX1BmMbsmqtUDRQ',
-    appId: '1:677302127068:ios:be01b0c22d948ea367a719',
+    appId: '1:677302127068:ios:3de464c917781c1d67a719',
     messagingSenderId: '677302127068',
     projectId: 'book-scanner-b550d',
     storageBucket: 'book-scanner-b550d.firebasestorage.app',
-    iosClientId:
-        '677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com',
-    iosBundleId: 'com.bookscanner.bookScanner',
+    iosClientId: '677302127068-9h4c8i09om9hjbmaru6bn2sg963sm2f2.apps.googleusercontent.com',
+    iosBundleId: 'com.wapertech.bookscanner',
   );
 }
