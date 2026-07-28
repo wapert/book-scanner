@@ -77,7 +77,7 @@ https://github.com/wapert/book-scanner
 
 ## 隱私權政策網址（Privacy Policy URL，必填）
 ```
-（見 docs/privacy.html — 用 GitHub Pages 發佈後填入該網址）
+https://wapert.github.io/book-scanner/privacy.html
 ```
 
 ---
