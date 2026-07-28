@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隱私權政策 · 書頁掃描 Book Scanner</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+      "Microsoft JhengHei", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.7; max-width: 760px; margin: 0 auto; padding: 32px 20px 64px;
+    color: #1a1a1a; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e8e8e8; background: #121212; }
+    a { color: #6ea8fe; }
+    h1, h2 { border-color: #333; }
+    code { background: #242424; }
+  }
+  h1 { font-size: 1.7rem; border-bottom: 2px solid #eee; padding-bottom: 12px; }
+  h2 { font-size: 1.2rem; margin-top: 32px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+  a { color: #2563eb; }
+  code { background: #f2f2f2; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  .muted { color: #888; font-size: 0.9rem; }
+  ul { padding-left: 22px; }
+  li { margin: 6px 0; }
+</style>
+</head>
+<body>
+  <h1>隱私權政策<br><span class="muted">Privacy Policy — 書頁掃描 (Book Scanner)</span></h1>
+  <p class="muted">最後更新：2026 年 7 月</p>
+
+  <p>感謝你使用「書頁掃描」（以下稱「本 App」）。我們重視你的隱私。本政策說明我們蒐集哪些資料、如何使用，以及你的權利。</p>
+
+  <h2>1. 我們蒐集的資料</h2>
+  <ul>
+    <li><strong>電子郵件地址</strong>：當你註冊或登入帳號時，透過 Google Firebase Authentication 蒐集，用於建立與辨識你的帳號。你的密碼由 Firebase 管理，App 不會以可讀形式儲存。</li>
+    <li><strong>頁面照片</strong>：你用相機拍下並選擇掃描的書頁照片，儲存在你帳號專屬的 Google Firebase Storage 空間。</li>
+    <li><strong>辨識與編輯的文字</strong>：每一頁的辨識文字，以及專案、書本、頁面的名稱與結構，儲存在 Google Firebase Firestore，並與你的帳號連結，以便跨裝置同步。</li>
+    <li><strong>本機資料</strong>：部分暫存檔（如匯出的 PDF）會儲存在你的裝置上。</li>
+  </ul>
+  <p>我們<strong>不會</strong>蒐集你的姓名、電話、精確位置、聯絡人，也不會存取麥克風。相機僅在你主動拍照掃描時使用。</p>
+
+  <h2>2. 文字辨識（OCR）如何運作</h2>
+  <p>文字辨識<strong>完全在你的裝置上</strong>進行，使用 Google 裝置端 ML Kit。你的頁面內容<strong>不會</strong>被送到任何第三方 OCR 服務辨識。頁面圖片僅上傳到你專屬的 Firebase Storage 空間，用於跨裝置同步。</p>
+
+  <h2>3. 資料如何使用</h2>
+  <ul>
+    <li>建立並保護你的帳號。</li>
+    <li>儲存並跨裝置同步你的專案、書本、頁面、圖片與文字。</li>
+    <li>提供 App 功能，例如匯出 PDF。</li>
+  </ul>
+  <p>我們<strong>不會</strong>將你的資料用於廣告或追蹤，<strong>不會</strong>販售或出租你的個人資料給第三方，也<strong>不含</strong>任何第三方分析或廣告 SDK。</p>
+
+  <h2>4. 資料儲存位置</h2>
+  <p>你的資料儲存在 Google Firebase（Google Cloud Platform）基礎架構上。存取受安全性規則限制，<strong>只有你登入的帳號</strong>能讀寫你的資料。</p>
+
+  <h2>5. 資料保留與刪除</h2>
+  <ul>
+    <li>你可以隨時在 App 內刪除個別的頁面、書本或專案；刪除頁面同時會移除其儲存的圖片。</li>
+    <li>你可以在 App 內的帳號選單（右上角）點「刪除帳號 / Delete account」，永久刪除你的帳號與所有相關資料（Firestore 資料、儲存的圖片、以及登入紀錄）。</li>
+    <li>你也可以透過下方 Email 聯絡我們要求刪除。</li>
+  </ul>
+
+  <h2>6. 兒童隱私</h2>
+  <p>本 App 並非以 13 歲以下兒童為對象，也不會在知情下蒐集兒童的個人資料。</p>
+
+  <h2>7. 政策變更</h2>
+  <p>我們可能不時更新本政策。重大變更將以上方「最後更新」日期反映。</p>
+
+  <h2>8. 聯絡我們</h2>
+  <p>如有隱私問題或資料刪除需求，請聯絡：<br>
+  <a href="mailto:your-support-email@example.com">your-support-email@example.com</a>（請改成你的實際聯絡信箱）</p>
+</body>
+</html>
