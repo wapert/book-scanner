@@ -4,8 +4,10 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 class OcrService {
-  /// On-device OCR is only available on Android (ML Kit has no macOS support).
-  static bool get isSupported => Platform.isAndroid;
+  /// On-device OCR is available on Android and iOS via ML Kit.
+  /// (macOS has no ML Kit support; ML Kit also does not run on Apple-Silicon
+  /// iOS simulators, but works on real iOS devices.)
+  static bool get isSupported => Platform.isAndroid || Platform.isIOS;
 
   /// Recognizes text in a local image file. Uses the Chinese model, which also
   /// handles Latin script, matching the app's mixed Chinese/English content.
