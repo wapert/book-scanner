@@ -15,10 +15,10 @@ class Book {
   }) : pages = pages ?? [];
 
   factory Book.create(String name) => Book(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        name: name,
-        createdAt: DateTime.now(),
-      );
+    id: DateTime.now().microsecondsSinceEpoch.toString(),
+    name: name,
+    createdAt: DateTime.now(),
+  );
 
   factory Book.fromJson(Map<String, dynamic> j) {
     final rawPages = (j['pages'] as List?) ?? [];
@@ -56,9 +56,9 @@ class Book {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'createdAt': createdAt.toIso8601String(),
-        'pages': pages.map((p) => p.toJson()).toList(),
-      };
+    'id': id,
+    'name': name,
+    'createdAt': createdAt.toIso8601String(),
+    'pages': pages.map((p) => p.toJson()).toList(),
+  };
 }

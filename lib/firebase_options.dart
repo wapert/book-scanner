@@ -60,7 +60,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '677302127068',
     projectId: 'book-scanner-b550d',
     storageBucket: 'book-scanner-b550d.firebasestorage.app',
-    iosClientId: '677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com',
+    iosClientId:
+        '677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com',
     iosBundleId: 'com.bookscanner.bookScanner',
   );
 
@@ -70,7 +71,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '677302127068',
     projectId: 'book-scanner-b550d',
     storageBucket: 'book-scanner-b550d.firebasestorage.app',
-    iosClientId: '677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com',
+    iosClientId:
+        '677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com',
     iosBundleId: 'com.bookscanner.bookScanner',
   );
 }

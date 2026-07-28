@@ -10,12 +10,9 @@ class PageItem {
   bool get hasText => text.trim().isNotEmpty;
 
   factory PageItem.fromJson(Map<String, dynamic> j) => PageItem(
-        photoUrl: (j['photoUrl'] as String?) ?? '',
-        text: (j['text'] as String?) ?? '',
-      );
+    photoUrl: (j['photoUrl'] as String?) ?? '',
+    text: (j['text'] as String?) ?? '',
+  );
 
-  Map<String, dynamic> toJson() => {
-        'photoUrl': photoUrl,
-        'text': text,
-      };
+  Map<String, dynamic> toJson() => {'photoUrl': photoUrl, 'text': text};
 }

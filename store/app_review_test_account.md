@@ -8,10 +8,11 @@ App Store 審核員需要一組帳號才能通過登入頁。請先建立以下�
 | 欄位 | 值 |
 |---|---|
 | **Email** | `review@bookscanner.app` |
-| **Password** | `BookReview#2026` |
+| **Password** | `[SET IN APP STORE CONNECT — DO NOT COMMIT]` |
 
 > Firebase 密碼登入不會寄驗證信，Email 不需真實可收信；此帳號僅供審核使用。
-> 密碼至少 6 碼即可，可自行更換，但務必與填入 App Store Connect 的一致。
+> 密碼至少 6 碼即可。請將密碼直接保存在 App Store Connect 的審核登入資訊，
+> 不要提交到公開 Git repository。舊密碼曾出現在 Git 歷史中，上架前必須更換。
 
 ## 如何建立此帳號（擇一）
 
@@ -35,7 +36,7 @@ App Store 審核員需要一組帳號才能通過登入頁。請先建立以下�
 
 - **需要登入 (Sign-in required)**：勾選 ✅
 - **使用者名稱 (User name)**：`review@bookscanner.app`
-- **密碼 (Password)**：`BookReview#2026`
+- **密碼 (Password)**：使用 Firebase 中已輪換的新密碼（不要寫入此檔案）
 
 ## 審核備註 (Review Notes) — 可直接貼上
 

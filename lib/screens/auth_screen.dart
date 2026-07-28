@@ -28,7 +28,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       if (_isLogin) {
         await AuthService.signIn(_emailCtrl.text.trim(), _passCtrl.text);
@@ -62,15 +65,15 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   String _friendlyError(String code) => switch (code) {
-        'user-not-found' => 'No account found with this email.',
-        'wrong-password' => 'Incorrect password.',
-        'email-already-in-use' => 'An account with this email already exists.',
-        'invalid-email' => 'Please enter a valid email address.',
-        'weak-password' => 'Password must be at least 6 characters.',
-        'too-many-requests' => 'Too many attempts. Please try again later.',
-        'invalid-credential' => 'Incorrect email or password.',
-        _ => 'Authentication error ($code). Please try again.',
-      };
+    'user-not-found' => 'No account found with this email.',
+    'wrong-password' => 'Incorrect password.',
+    'email-already-in-use' => 'An account with this email already exists.',
+    'invalid-email' => 'Please enter a valid email address.',
+    'weak-password' => 'Password must be at least 6 characters.',
+    'too-many-requests' => 'Too many attempts. Please try again later.',
+    'invalid-credential' => 'Incorrect email or password.',
+    _ => 'Authentication error ($code). Please try again.',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +84,9 @@ class _AuthScreenState extends State<AuthScreen> {
           padding: const EdgeInsets.all(24),
           child: Card(
             elevation: 8,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(28),
               child: Form(
@@ -90,15 +95,24 @@ class _AuthScreenState extends State<AuthScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Logo / title
-                    const Icon(Icons.menu_book,
-                        size: 64, color: Color(0xFF1565C0)),
+                    const Icon(
+                      Icons.menu_book,
+                      size: 64,
+                      color: Color(0xFF1565C0),
+                    ),
                     const SizedBox(height: 8),
-                    const Text('Book Scanner',
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Book Scanner',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(
-                      _isLogin ? 'Sign in to your account' : 'Create a new account',
+                      _isLogin
+                          ? 'Sign in to your account'
+                          : 'Create a new account',
                       style: TextStyle(color: Colors.grey[600], fontSize: 13),
                     ),
                     const SizedBox(height: 24),
@@ -112,8 +126,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         prefixIcon: Icon(Icons.email_outlined),
                         border: OutlineInputBorder(),
                       ),
-                      validator: (v) =>
-                          (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                      validator: (v) => (v == null || !v.contains('@'))
+                          ? 'Enter a valid email'
+                          : null,
                     ),
                     const SizedBox(height: 16),
 
@@ -126,22 +141,27 @@ class _AuthScreenState extends State<AuthScreen> {
                         prefixIcon: const Icon(Icons.lock_outline),
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscure
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined),
+                          icon: Icon(
+                            _obscure
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
                           onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
-                      validator: (v) =>
-                          (v == null || v.length < 6) ? 'At least 6 characters' : null,
+                      validator: (v) => (v == null || v.length < 6)
+                          ? 'At least 6 characters'
+                          : null,
                     ),
 
                     // Error message
                     if (_error != null) ...[
                       const SizedBox(height: 12),
-                      Text(_error!,
-                          style: const TextStyle(color: Colors.red, fontSize: 13),
-                          textAlign: TextAlign.center),
+                      Text(
+                        _error!,
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                     const SizedBox(height: 24),
 
@@ -151,16 +171,22 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: FilledButton(
                         onPressed: _loading ? null : _submit,
                         style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF1565C0),
-                            padding: const EdgeInsets.symmetric(vertical: 14)),
+                          backgroundColor: const Color(0xFF1565C0),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
                         child: _loading
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
-                            : Text(_isLogin ? 'Sign In' : 'Create Account',
-                                style: const TextStyle(fontSize: 16)),
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                _isLogin ? 'Sign In' : 'Create Account',
+                                style: const TextStyle(fontSize: 16),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -171,17 +197,21 @@ class _AuthScreenState extends State<AuthScreen> {
                         _isLogin = !_isLogin;
                         _error = null;
                       }),
-                      child: Text(_isLogin
-                          ? "Don't have an account? Sign Up"
-                          : 'Already have an account? Sign In'),
+                      child: Text(
+                        _isLogin
+                            ? "Don't have an account? Sign Up"
+                            : 'Already have an account? Sign In',
+                      ),
                     ),
 
                     // Forgot password (login only)
                     if (_isLogin)
                       TextButton(
                         onPressed: _resetPassword,
-                        child: const Text('Forgot password?',
-                            style: TextStyle(color: Colors.grey)),
+                        child: const Text(
+                          'Forgot password?',
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       ),
                   ],
                 ),

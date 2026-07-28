@@ -1,30 +1,47 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:book_scanner/main.dart';
+import 'package:book_scanner/models/book.dart';
+import 'package:book_scanner/models/page_item.dart';
+import 'package:book_scanner/models/project.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('project hierarchy survives JSON serialization', () {
+    final project = Project(
+      id: 'project-1',
+      name: 'Research',
+      createdAt: DateTime.utc(2026, 7, 28),
+      books: [
+        Book(
+          id: 'book-1',
+          name: 'Reference Book',
+          createdAt: DateTime.utc(2026, 7, 28),
+          pages: [
+            PageItem(
+              photoUrl: 'https://example.com/page.jpg',
+              text: 'Recognized text',
+            ),
+          ],
+        ),
+      ],
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    final restored = Project.fromJson(project.toJson());
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    expect(restored.id, project.id);
+    expect(restored.name, 'Research');
+    expect(restored.books.single.name, 'Reference Book');
+    expect(restored.books.single.pages.single.text, 'Recognized text');
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('legacy photo-only pages are migrated', () {
+    final book = Book.fromJson({
+      'id': 'book-1',
+      'name': 'Legacy Book',
+      'createdAt': '2026-07-28T00:00:00.000Z',
+      'pages': ['https://example.com/legacy.jpg'],
+    });
+
+    expect(book.pages.single.photoUrl, 'https://example.com/legacy.jpg');
+    expect(book.pages.single.text, isEmpty);
   });
 }

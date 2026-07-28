@@ -58,8 +58,9 @@ class _PageDetailScreenState extends State<PageDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('OCR failed: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('OCR failed: $e')));
       }
     } finally {
       if (mounted) setState(() => _running = false);
@@ -100,17 +101,21 @@ class _PageDetailScreenState extends State<PageDetailScreen> {
             content: const Text('Your edits to this page have not been saved.'),
             actions: [
               TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Keep editing')),
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Keep editing'),
+              ),
               TextButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Discard',
-                      style: TextStyle(color: Colors.red))),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text(
+                  'Discard',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
             ],
           ),
         );
         if (discard != true) return;
-        if (!mounted) return;
+        if (!context.mounted) return;
         Navigator.pop(context, false);
       },
       child: Scaffold(
@@ -140,8 +145,10 @@ class _PageDetailScreenState extends State<PageDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 children: [
-                  const Text('Recognized text',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Recognized text',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const Spacer(),
                   if (OcrService.isSupported)
                     TextButton.icon(
@@ -150,14 +157,18 @@ class _PageDetailScreenState extends State<PageDetailScreen> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2))
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
                           : const Icon(Icons.document_scanner, size: 18),
-                      label: Text(widget.page.hasText ? 'Re-run OCR' : 'Run OCR'),
+                      label: Text(
+                        widget.page.hasText ? 'Re-run OCR' : 'Run OCR',
+                      ),
                     )
                   else
-                    const Text('OCR: Android only',
-                        style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    const Text(
+                      'OCR unavailable on this device',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
                 ],
               ),
             ),

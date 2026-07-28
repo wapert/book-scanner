@@ -8,10 +8,6 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Book Scanner uses the camera to photograph book pages so you can save and organize them.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Book Scanner needs access to your photo library to import existing page photos.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Book Scanner saves exported PDFs and page images to your photo library.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

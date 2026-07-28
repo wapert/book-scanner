@@ -15,9 +15,7 @@ class StorageService {
 
   static Future<List<Project>> loadProjects() async {
     final snap = await _col.orderBy('createdAt', descending: true).get();
-    return snap.docs
-        .map((d) => Project.fromJson(d.data()))
-        .toList();
+    return snap.docs.map((d) => Project.fromJson(d.data())).toList();
   }
 
   /// Deletes every project document for the current user. Used by account
@@ -54,7 +52,8 @@ class StorageService {
   // ── Local export directory (for PDFs) ─────────────────────────────────────
 
   /// Returns the directory where PDFs are exported.
-  /// macOS → ~/Downloads/BookScanner, Android → external storage/BookScanner.
+  /// macOS uses Downloads, Android uses external app storage, and iOS uses the
+  /// app's Documents directory so the PDF can be opened or shared.
   static Future<Directory> exportDir() async {
     if (Platform.isMacOS) {
       final downloads = await getDownloadsDirectory();
@@ -62,8 +61,10 @@ class StorageService {
       await dir.create(recursive: true);
       return dir;
     }
-    final ext = await getExternalStorageDirectory();
-    final dir = Directory('${ext!.path}/BookScanner');
+    final base = Platform.isAndroid
+        ? await getExternalStorageDirectory()
+        : await getApplicationDocumentsDirectory();
+    final dir = Directory('${base!.path}/BookScanner');
     await dir.create(recursive: true);
     return dir;
   }

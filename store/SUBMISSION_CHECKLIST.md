@@ -15,6 +15,9 @@ Ordered so you can work top to bottom.
       name when you reserve it (see APP_STORE_LISTING.md).
 - [ ] **Apple Developer Program membership** ($99/yr) active:
       https://developer.apple.com/programs/
+- [ ] **Rotate the App Review account password.** The old password was
+      previously committed to this public repository and remains in Git
+      history. Store the replacement only in Firebase and App Store Connect.
 
 ---
 
@@ -39,7 +42,9 @@ Ordered so you can work top to bottom.
       ```
 - [ ] Select the **Runner** target → **Signing & Capabilities**:
       - Check **Automatically manage signing**
-      - **Team:** select your Apple Developer team (U38KEH9A34 is your dev team)
+      - **Team:** select team `NR6H8UUF43`. This matches the TeamIdentifier in
+        the archive's embedded provisioning profile. (`U38KEH9A34` appears in
+        the certificate label but is not the provisioning TeamIdentifier.)
       - Confirm the bundle identifier matches `com.bookscanner.bookScanner`
 - [ ] Firebase requires no extra capability here. (Push notifications are NOT
       used, so no APNs setup needed.)
@@ -50,8 +55,7 @@ Ordered so you can work top to bottom.
       the standard iOS icon set. Easiest path: use a tool like `flutter_launcher_icons`,
       or drop images into
       `ios/Runner/Assets.xcassets/AppIcon.appiconset`.
-- [ ] Verify the launch screen (`ios/Runner/Base.lproj/LaunchScreen.storyboard`)
-      looks acceptable (it's currently the Flutter default — a plain screen is fine).
+- [x] Launch screen uses the app's solid brand blue and no Flutter placeholder.
 
 ## 4. Version & build number
 
@@ -71,6 +75,15 @@ This produces `build/ios/archive/Runner.xcarchive` and, if signing succeeds, an
 `.ipa` under `build/ios/ipa/`. If you prefer the GUI, run
 `flutter build ios --release` then **Xcode → Product → Archive**.
 
+Local verification completed:
+- [x] `flutter analyze` passes with no issues.
+- [x] `flutter test` passes.
+- [x] Unsigned iOS release build succeeds.
+- [x] Signed Xcode archive succeeds and passes app-settings validation.
+- [ ] IPA export currently requires registering
+      `com.bookscanner.bookScanner` and creating an App Store provisioning
+      profile for team `NR6H8UUF43`.
+
 ## 6. Upload
 
 Either:
@@ -81,11 +94,18 @@ Either:
 
 ## 7. Screenshots (required)
 
-You must upload screenshots for at least:
-- [ ] **6.7" iPhone** (1290 × 2796) — e.g. iPhone 15 Pro Max
-- [ ] **6.5" iPhone** (1284 × 2778 or 1242 × 2688) — often reused from 6.7"
+You must upload screenshots for the largest supported iPhone display:
+- [x] **6.9" iPhone** — the supplied screenshots are 1320 × 2868, an accepted
+      size for iPhone 16 Pro Max.
+- [ ] Upload 1–10 screenshots in App Store Connect. Three are currently
+      available in `store/screenshots/`.
 - iPad shots only required if you leave iPad support on. To ship iPhone-only,
   set the app to iPhone in target settings.
+
+**Current target status:** `TARGETED_DEVICE_FAMILY = "1,2"` supports both
+iPhone and iPad, but no iPad screenshots are currently checked into
+`store/screenshots/ipad/`. Before submission, either add iPad screenshots or
+change the Runner target to iPhone-only (`TARGETED_DEVICE_FAMILY = "1"`).
 
 Capture from the iOS Simulator:
 ```bash

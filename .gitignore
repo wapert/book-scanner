@@ -3,8 +3,11 @@
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
-pubspec.lock
 build/
+.gradle/
+node_modules/
+package.json
+package-lock.json
 
 # Android
 android/.gradle/
@@ -32,6 +35,8 @@ stock_app2/
 # Sensitive / generated
 *.env
 *.log
+.claude/
+**/xcshareddata/swiftpm/
 
 # iOS
 ios/Pods/

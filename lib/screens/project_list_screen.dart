@@ -58,8 +58,11 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   // ── Create project ─────────────────────────────────────────────────────────
 
   Future<void> _createProject() async {
-    final name = await askName(context,
-        title: 'New Project', hint: 'Project name');
+    final name = await askName(
+      context,
+      title: 'New Project',
+      hint: 'Project name',
+    );
     if (name == null) return;
     final project = Project.create(name);
     setState(() => _projects.add(project));
@@ -73,10 +76,8 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ProjectDetailScreen(
-            project: project,
-            allProjects: _projects,
-          ),
+          builder: (_) =>
+              ProjectDetailScreen(project: project, allProjects: _projects),
         ),
       ).then((_) => setState(() {}));
     }
@@ -85,8 +86,12 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   // ── Rename project ─────────────────────────────────────────────────────────
 
   Future<void> _renameProject(Project project) async {
-    final name = await askName(context,
-        title: 'Rename Project', hint: 'Project name', initial: project.name);
+    final name = await askName(
+      context,
+      title: 'Rename Project',
+      hint: 'Project name',
+      initial: project.name,
+    );
     if (name == null) return;
     setState(() => project.name = name);
     await _save();
@@ -100,15 +105,16 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete project?'),
         content: Text(
-          '"${project.name}" and all ${project.books.length} book(s) will be deleted permanently.'),
+          '"${project.name}" and all ${project.books.length} book(s) will be deleted permanently.',
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child:
-                const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -149,12 +155,15 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete forever',
-                style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'Delete forever',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -175,11 +184,13 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
         context: context,
         barrierDismissible: false,
         builder: (_) => const AlertDialog(
-          content: Row(children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 16),
-            Expanded(child: Text('Deleting your account…')),
-          ]),
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Expanded(child: Text('Deleting your account…')),
+            ],
+          ),
         ),
       );
     }
@@ -196,7 +207,8 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     } catch (e) {
       if (mounted) Navigator.pop(context); // close progress dialog
       if (mounted) {
-        final msg = e.toString().contains('wrong-password') ||
+        final msg =
+            e.toString().contains('wrong-password') ||
                 e.toString().contains('invalid-credential')
             ? 'Incorrect password. Account not deleted.'
             : 'Could not delete account: $e';
@@ -237,20 +249,26 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                 const PopupMenuDivider(),
                 const PopupMenuItem(
                   value: 'signout',
-                  child: Row(children: [
-                    Icon(Icons.logout, size: 18),
-                    SizedBox(width: 8),
-                    Text('Sign Out'),
-                  ]),
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, size: 18),
+                      SizedBox(width: 8),
+                      Text('Sign Out'),
+                    ],
+                  ),
                 ),
                 const PopupMenuItem(
                   value: 'delete',
-                  child: Row(children: [
-                    Icon(Icons.delete_forever, size: 18, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Delete account',
-                        style: TextStyle(color: Colors.red)),
-                  ]),
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_forever, size: 18, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text(
+                        'Delete account',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -260,77 +278,85 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _projects.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.folder_open, size: 72, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No projects yet.\nTap the button below to create one.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.folder_open, size: 72, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No projects yet.\nTap the button below to create one.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: _projects.length,
+                itemBuilder: (ctx, i) {
+                  final p = _projects[i];
+                  final bookCount = p.books.length;
+                  final pageCount = p.books.fold<int>(
+                    0,
+                    (s, b) => s + b.pages.length,
+                  );
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    child: ListTile(
+                      leading: const CircleAvatar(
+                        backgroundColor: Color(0xFF1565C0),
+                        child: Icon(Icons.folder, color: Colors.white),
                       ),
-                    ],
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _load,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: _projects.length,
-                    itemBuilder: (ctx, i) {
-                      final p = _projects[i];
-                      final bookCount = p.books.length;
-                      final pageCount =
-                          p.books.fold<int>(0, (s, b) => s + b.pages.length);
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundColor: Color(0xFF1565C0),
-                            child: Icon(Icons.folder, color: Colors.white),
-                          ),
-                          title: Text(p.name,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16)),
-                          subtitle: Text(
-                            '$bookCount book${bookCount == 1 ? '' : 's'} · '
-                            '$pageCount page${pageCount == 1 ? '' : 's'} · '
-                            'Created ${DateFormat('MMM d, yyyy').format(p.createdAt)}',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          trailing: PopupMenuButton<String>(
-                            onSelected: (v) {
-                              if (v == 'rename') _renameProject(p);
-                              if (v == 'delete') _deleteProject(p);
-                            },
-                            itemBuilder: (_) => const [
-                              PopupMenuItem(
-                                  value: 'rename', child: Text('Rename')),
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Text('Delete',
-                                    style: TextStyle(color: Colors.red)),
-                              ),
-                            ],
-                          ),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ProjectDetailScreen(
-                                project: p,
-                                allProjects: _projects,
-                              ),
-                            ),
-                          ).then((_) => setState(() {})),
+                      title: Text(
+                        p.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      ),
+                      subtitle: Text(
+                        '$bookCount book${bookCount == 1 ? '' : 's'} · '
+                        '$pageCount page${pageCount == 1 ? '' : 's'} · '
+                        'Created ${DateFormat('MMM d, yyyy').format(p.createdAt)}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      trailing: PopupMenuButton<String>(
+                        onSelected: (v) {
+                          if (v == 'rename') _renameProject(p);
+                          if (v == 'delete') _deleteProject(p);
+                        },
+                        itemBuilder: (_) => const [
+                          PopupMenuItem(value: 'rename', child: Text('Rename')),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(
+                              'Delete',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProjectDetailScreen(
+                            project: p,
+                            allProjects: _projects,
+                          ),
+                        ),
+                      ).then((_) => setState(() {})),
+                    ),
+                  );
+                },
+              ),
+            ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createProject,
         icon: const Icon(Icons.create_new_folder),

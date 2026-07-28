@@ -12,8 +12,7 @@ class OcrService {
   /// Recognizes text in a local image file. Uses the Chinese model, which also
   /// handles Latin script, matching the app's mixed Chinese/English content.
   static Future<String> recognizeFile(String localPath) async {
-    final recognizer =
-        TextRecognizer(script: TextRecognitionScript.chinese);
+    final recognizer = TextRecognizer(script: TextRecognitionScript.chinese);
     try {
       final input = InputImage.fromFilePath(localPath);
       final result = await recognizer.processImage(input);
@@ -32,12 +31,15 @@ class OcrService {
     }
     final dir = await getTemporaryDirectory();
     final file = File(
-        '${dir.path}/ocr_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      '${dir.path}/ocr_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
     await file.writeAsBytes(response.bodyBytes);
     try {
       return await recognizeFile(file.path);
     } finally {
-      try { await file.delete(); } catch (_) {}
+      try {
+        await file.delete();
+      } catch (_) {}
     }
   }
 }

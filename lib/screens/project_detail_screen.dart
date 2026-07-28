@@ -50,8 +50,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   // ── Rename book ────────────────────────────────────────────────────────────
 
   Future<void> _renameBook(Book book) async {
-    final name = await askName(context,
-        title: 'Rename Book', hint: 'Book name', initial: book.name);
+    final name = await askName(
+      context,
+      title: 'Rename Book',
+      hint: 'Book name',
+      initial: book.name,
+    );
     if (name == null) return;
     setState(() => book.name = name);
     await _save();
@@ -65,11 +69,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete book?'),
         content: Text(
-          '"${book.name}" and all ${book.pages.length} page(s) will be deleted.'),
+          '"${book.name}" and all ${book.pages.length} page(s) will be deleted.',
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
@@ -123,12 +129,20 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               itemBuilder: (ctx, i) {
                 final book = _project.books[i];
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   child: ListTile(
-                    leading: const Icon(Icons.menu_book,
-                        color: Color(0xFF1565C0), size: 36),
-                    title: Text(book.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    leading: const Icon(
+                      Icons.menu_book,
+                      color: Color(0xFF1565C0),
+                      size: 36,
+                    ),
+                    title: Text(
+                      book.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     subtitle: Text(
                       '${book.pages.length} page${book.pages.length == 1 ? '' : 's'} · '
                       'Created ${DateFormat('MMM d, yyyy').format(book.createdAt)}',
@@ -143,20 +157,26 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                         PopupMenuItem(value: 'rename', child: Text('Rename')),
                         PopupMenuItem(
                           value: 'delete',
-                          child: Text('Delete', style: TextStyle(color: Colors.red)),
+                          child: Text(
+                            'Delete',
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ),
                       ],
                     ),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BookDetailScreen(
-                          project: _project,
-                          book: book,
-                          allProjects: widget.allProjects,
-                        ),
-                      ),
-                    ).then((_) => setState(() {})), // refresh page count on return
+                    onTap: () =>
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BookDetailScreen(
+                              project: _project,
+                              book: book,
+                              allProjects: widget.allProjects,
+                            ),
+                          ),
+                        ).then(
+                          (_) => setState(() {}),
+                        ), // refresh page count on return
                   ),
                 );
               },
@@ -171,4 +191,3 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     );
   }
 }
-
