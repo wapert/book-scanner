@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/project.dart';
@@ -178,12 +180,27 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       return;
     }
 
-    // Progress dialog
-    if (mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => const AlertDialog(
+    if (!mounted) return;
+
+    // Capture the root navigator BEFORE any async work. Deleting the account
+    // rebuilds the tree (authStateChanges → AuthScreen) and unmounts this
+    // State, so `context` can no longer be used to dismiss the dialog.
+    final rootNav = Navigator.of(context, rootNavigator: true);
+    var dialogOpen = true;
+    void closeProgressDialog() {
+      if (!dialogOpen) return;
+      dialogOpen = false;
+      rootNav.pop();
+    }
+
+    // PopScope keeps the user from dismissing this with the back gesture;
+    // Navigator.pop() still closes it programmatically.
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const PopScope(
+        canPop: false,
+        child: AlertDialog(
           content: Row(
             children: [
               CircularProgressIndicator(),
@@ -192,30 +209,41 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
             ],
           ),
         ),
-      );
-    }
+      ),
+    );
+
+    // A hung network call must not leave the spinner up forever.
+    const limit = Duration(seconds: 60);
 
     try {
       // 1. Re-authenticate (Firebase requires a recent login to delete).
-      await AuthService.reauthenticate(passCtrl.text);
+      await AuthService.reauthenticate(passCtrl.text).timeout(limit);
       // 2. Delete cloud data while still authenticated.
-      await PhotoService.deleteAllUserFiles();
-      await StorageService.deleteAllData();
-      // 3. Delete the auth account last. authStateChanges → back to AuthScreen.
+      await PhotoService.deleteAllUserFiles().timeout(limit);
+      await StorageService.deleteAllData().timeout(limit);
+      // 3. Close the dialog BEFORE deleting the auth account. Deleting the
+      //    account swaps the tree to AuthScreen; a dialog route left on the
+      //    stack would survive that swap and hang on screen.
+      closeProgressDialog();
+      // 4. Delete the account — authStateChanges returns the user to sign-in.
       await AuthService.deleteAccount();
-      // No navigation needed: the StreamBuilder in main.dart swaps to AuthScreen.
     } catch (e) {
-      if (mounted) Navigator.pop(context); // close progress dialog
-      if (mounted) {
-        final msg =
-            e.toString().contains('wrong-password') ||
-                e.toString().contains('invalid-credential')
-            ? 'Incorrect password. Account not deleted.'
-            : 'Could not delete account: $e';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg), duration: const Duration(seconds: 6)),
-        );
-      }
+      closeProgressDialog();
+      if (!mounted) return;
+      final text = e.toString();
+      final msg =
+          text.contains('wrong-password') || text.contains('invalid-credential')
+          ? 'Incorrect password. Account not deleted.'
+          : e is TimeoutException
+          ? 'Deletion timed out. Check your connection and try again.'
+          : 'Could not delete account: $e';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), duration: const Duration(seconds: 6)),
+      );
+    } finally {
+      // Safety net: guarantees the spinner is gone on every path.
+      closeProgressDialog();
+      passCtrl.dispose();
     }
   }
 
