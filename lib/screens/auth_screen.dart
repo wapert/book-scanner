@@ -13,6 +13,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
 
   bool _isLogin = true;
   bool _loading = false;
@@ -23,6 +24,7 @@ class _AuthScreenState extends State<AuthScreen> {
   void dispose() {
     _emailCtrl.dispose();
     _passCtrl.dispose();
+    _confirmCtrl.dispose();
     super.dispose();
   }
 
@@ -154,6 +156,30 @@ class _AuthScreenState extends State<AuthScreen> {
                           : null,
                     ),
 
+                    // Confirm password (sign-up only)
+                    if (!_isLogin) ...[
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _confirmCtrl,
+                        obscureText: _obscure,
+                        decoration: const InputDecoration(
+                          labelText: 'Confirm password',
+                          prefixIcon: Icon(Icons.lock_outline),
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (v) {
+                          if (_isLogin) return null;
+                          if (v == null || v.isEmpty) {
+                            return 'Please re-enter your password';
+                          }
+                          if (v != _passCtrl.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+
                     // Error message
                     if (_error != null) ...[
                       const SizedBox(height: 12),
@@ -196,6 +222,8 @@ class _AuthScreenState extends State<AuthScreen> {
                       onPressed: () => setState(() {
                         _isLogin = !_isLogin;
                         _error = null;
+                        // Drop any stale confirmation text when switching modes.
+                        _confirmCtrl.clear();
                       }),
                       child: Text(
                         _isLogin
