@@ -77,8 +77,14 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
       enableAudio: false,
     );
     await ctrl.initialize();
-    if (!mounted) { ctrl.dispose(); return; }
-    setState(() { _controller = ctrl; _initialized = true; });
+    if (!mounted) {
+      ctrl.dispose();
+      return;
+    }
+    setState(() {
+      _controller = ctrl;
+      _initialized = true;
+    });
   }
 
   // ── Capture ────────────────────────────────────────────────────────────────
@@ -89,11 +95,15 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     setState(() => _capturing = true);
     try {
       final xfile = await ctrl.takePicture();
-      setState(() { _previewPath = xfile.path; _capturing = false; });
+      setState(() {
+        _previewPath = xfile.path;
+        _capturing = false;
+      });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Capture failed: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Capture failed: $e')));
       }
       setState(() => _capturing = false);
     }
@@ -135,14 +145,18 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
       if (mounted) Navigator.pop(context, PageItem(photoUrl: url, text: text));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed: $e')));
         setState(() => _uploading = false);
       }
     }
   }
 
-  void _retake() => setState(() { _previewPath = null; _uploading = false; });
+  void _retake() => setState(() {
+    _previewPath = null;
+    _uploading = false;
+  });
 
   // ── Build ──────────────────────────────────────────────────────────────────
 
@@ -159,170 +173,221 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   // ── Camera view ────────────────────────────────────────────────────────────
 
   Widget _buildCamera() {
-    return Stack(children: [
-      if (_initialized && _controller != null)
-        Positioned.fill(child: CameraPreview(_controller!))
-      else
-        const Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            CircularProgressIndicator(color: Colors.white),
-            SizedBox(height: 12),
-            Text('Starting camera…', style: TextStyle(color: Colors.white)),
-          ]),
-        ),
-
-      Positioned(
-        top: 0, left: 0, right: 0,
-        child: Container(
-          color: Colors.black54,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Row(children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+    return Stack(
+      children: [
+        if (_initialized && _controller != null)
+          Positioned.fill(child: CameraPreview(_controller!))
+        else
+          const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(color: Colors.white),
+                SizedBox(height: 12),
+                Text('Starting camera…', style: TextStyle(color: Colors.white)),
+              ],
             ),
-            const Text('Scan Page',
-                style: TextStyle(
+          ),
+
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            color: Colors.black54,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                const Text(
+                  'Scan Page',
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-          ]),
-        ),
-      ),
-
-      Positioned(
-        bottom: 0, left: 0, right: 0,
-        child: Container(
-          color: Colors.black87,
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text('Point at a book page and tap the button',
-                style: TextStyle(color: Colors.white70, fontSize: 13)),
-            const SizedBox(height: 16),
-            if (_capturing)
-              const CircularProgressIndicator(color: Colors.white)
-            else
-              GestureDetector(
-                onTap: _capture,
-                child: Container(
-                  width: 72, height: 72,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF1565C0),
-                    border: Border.all(color: Colors.white, width: 3),
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: const Icon(Icons.camera_alt, color: Colors.white, size: 32),
                 ),
-              ),
-          ]),
+              ],
+            ),
+          ),
         ),
-      ),
-    ]);
+
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            color: Colors.black87,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Point at a book page and tap the button',
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                if (_capturing)
+                  const CircularProgressIndicator(color: Colors.white)
+                else
+                  GestureDetector(
+                    onTap: _capture,
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF1565C0),
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   // ── Photo preview view ─────────────────────────────────────────────────────
 
   Widget _buildPreview() {
-    return Stack(children: [
-      Column(children: [
-        // Toolbar
-        Container(
-          color: Colors.black,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Row(children: [
-            IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              tooltip: 'Retake',
-              onPressed: _uploading ? null : _retake,
-            ),
-            const Expanded(
-              child: Text('Use this photo?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold)),
-            ),
-            IconButton(
-              icon: const Icon(Icons.check_circle,
-                  color: Colors.greenAccent, size: 32),
-              tooltip: 'Add to book',
-              onPressed: _uploading ? null : _confirm,
-            ),
-          ]),
-        ),
-
-        // Full photo (local temp file for preview).
-        // cacheWidth downsamples the decode so a very high-resolution capture
-        // does not load a huge bitmap into memory just to preview it.
-        Expanded(
-          child: Image.file(
-            File(_previewPath!),
-            fit: BoxFit.contain,
-            cacheWidth: 1280,
-            width: double.infinity,
-          ),
-        ),
-
-        // Action buttons
-        Container(
-          color: Colors.black87,
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
-          child: Row(children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _uploading ? null : _retake,
-                icon: const Icon(Icons.refresh, color: Colors.white),
-                label: const Text('Retake',
-                    style: TextStyle(color: Colors.white)),
-                style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white54)),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: _uploading ? null : _confirm,
-                icon: const Icon(Icons.cloud_upload),
-                label: const Text('Add to Book'),
-                style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF1565C0)),
-              ),
-            ),
-          ]),
-        ),
-      ]),
-
-      // Upload overlay
-      if (_uploading)
-        Positioned.fill(
-          child: Container(
-            color: Colors.black54,
-            child: Center(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(_statusText.isEmpty ? 'Working…' : _statusText,
-                    style: const TextStyle(color: Colors.white, fontSize: 16)),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: 200,
-                  child: LinearProgressIndicator(
-                    value: (_statusText == 'Uploading…' && _uploadProgress > 0)
-                        ? _uploadProgress
-                        : null,
-                    color: const Color(0xFF1565C0),
-                    backgroundColor: Colors.white24,
+    return Stack(
+      children: [
+        Column(
+          children: [
+            // Toolbar
+            Container(
+              color: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    tooltip: 'Retake',
+                    onPressed: _uploading ? null : _retake,
                   ),
+                  const Expanded(
+                    child: Text(
+                      'Use this photo?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.check_circle,
+                      color: Colors.greenAccent,
+                      size: 32,
+                    ),
+                    tooltip: 'Add to book',
+                    onPressed: _uploading ? null : _confirm,
+                  ),
+                ],
+              ),
+            ),
+
+            // Full photo (local temp file for preview).
+            // cacheWidth downsamples the decode so a very high-resolution capture
+            // does not load a huge bitmap into memory just to preview it.
+            Expanded(
+              child: Image.file(
+                File(_previewPath!),
+                fit: BoxFit.contain,
+                cacheWidth: 1280,
+                width: double.infinity,
+              ),
+            ),
+
+            // Action buttons
+            Container(
+              color: Colors.black87,
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _uploading ? null : _retake,
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      label: const Text(
+                        'Retake',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white54),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _uploading ? null : _confirm,
+                      icon: const Icon(Icons.cloud_upload),
+                      label: const Text('Add to Book'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF1565C0),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        // Upload overlay
+        if (_uploading)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black54,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _statusText.isEmpty ? 'Working…' : _statusText,
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: 200,
+                      child: LinearProgressIndicator(
+                        value:
+                            (_statusText == 'Uploading…' && _uploadProgress > 0)
+                            ? _uploadProgress
+                            : null,
+                        color: const Color(0xFF1565C0),
+                        backgroundColor: Colors.white24,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    if (_statusText == 'Uploading…' && _uploadProgress > 0)
+                      Text(
+                        '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                if (_statusText == 'Uploading…' && _uploadProgress > 0)
-                  Text(
-                    '${(_uploadProgress * 100).toStringAsFixed(0)}%',
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
-              ]),
+              ),
             ),
           ),
-        ),
-    ]);
+      ],
+    );
   }
 }

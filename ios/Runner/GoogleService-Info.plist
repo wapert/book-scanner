@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com</string>
+	<string>677302127068-9h4c8i09om9hjbmaru6bn2sg963sm2f2.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io</string>
+	<string>com.googleusercontent.apps.677302127068-9h4c8i09om9hjbmaru6bn2sg963sm2f2</string>
 	<key>API_KEY</key>
 	<string>AIzaSyC02ya_CqG1X_sMfv2JWX1BmMbsmqtUDRQ</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.bookscanner.bookScanner</string>
+	<string>com.wapertech.bookscanner</string>
 	<key>PROJECT_ID</key>
 	<string>book-scanner-b550d</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:677302127068:ios:be01b0c22d948ea367a719</string>
+	<string>1:677302127068:ios:3de464c917781c1d67a719</string>
 </dict>
 </plist>

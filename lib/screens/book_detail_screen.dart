@@ -40,8 +40,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       return true;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Could not save: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not save: $e')));
       }
       return false;
     }
@@ -71,10 +72,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     final changed = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => PageDetailScreen(
-          page: _book.pages[index],
-          pageNumber: index + 1,
-        ),
+        builder: (_) =>
+            PageDetailScreen(page: _book.pages[index], pageNumber: index + 1),
       ),
     );
     if (changed == true) {
@@ -94,8 +93,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         content: const Text('This cannot be undone.'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
@@ -119,7 +119,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       if (url.startsWith('http')) {
         await PhotoService.deletePhoto(url);
       } else {
-        try { await File(url).delete(); } catch (_) {}
+        try {
+          await File(url).delete();
+        } catch (_) {}
       }
     }
   }
@@ -131,7 +133,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     if (target == null) return;
 
     final indices = _selected.toList()..sort((a, b) => b.compareTo(a));
-    final moving = indices.map((i) => _book.pages[i]).toList().reversed.toList();
+    final moving =
+        indices.map((i) => _book.pages[i]).toList().reversed.toList();
     setState(() {
       for (final i in indices) {
         _book.pages.removeAt(i);
@@ -142,7 +145,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     await _save();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Moved ${moving.length} page(s) to "${target.name}"')),
+        SnackBar(
+          content: Text('Moved ${moving.length} page(s) to "${target.name}"'),
+        ),
       );
     }
   }
@@ -157,7 +162,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     }
     if (options.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No other book to move to. Create one first.')),
+        const SnackBar(
+          content: Text('No other book to move to. Create one first.'),
+        ),
       );
       return null;
     }
@@ -169,8 +176,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           children: [
             const Padding(
               padding: EdgeInsets.all(16),
-              child: Text('Move to book',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              child: Text(
+                'Move to book',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
             ),
             Flexible(
               child: ListView(
@@ -178,11 +187,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 children: [
                   for (final (projName, b) in options)
                     ListTile(
-                      leading: const Icon(Icons.menu_book,
-                          color: Color(0xFF1565C0)),
+                      leading: const Icon(
+                        Icons.menu_book,
+                        color: Color(0xFF1565C0),
+                      ),
                       title: Text(b.name),
                       subtitle: Text(
-                          '$projName · ${b.pages.length} page${b.pages.length == 1 ? '' : 's'}'),
+                        '$projName · ${b.pages.length} page${b.pages.length == 1 ? '' : 's'}',
+                      ),
                       onTap: () => Navigator.pop(ctx, b),
                     ),
                 ],
@@ -223,26 +235,31 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   Future<void> _exportPdf() async {
     if (_book.pages.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No pages to export yet')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No pages to export yet')));
       return;
     }
     try {
       final urls = _book.pages.map((p) => p.photoUrl).toList();
       final file = await PdfExporter.export(urls, _book.name);
       if (!mounted) return;
-      final saveLocation =
-          Platform.isMacOS ? '~/Downloads/BookScanner' : 'Documents/BookScanner';
+      final saveLocation = Platform.isMacOS
+          ? '~/Downloads/BookScanner'
+          : 'Documents/BookScanner';
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('PDF saved!'),
-          content: Text('"${_book.name}.pdf"\n'
-              '${_book.pages.length} page(s) saved to $saveLocation'),
+          content: Text(
+            '"${_book.name}.pdf"\n'
+            '${_book.pages.length} page(s) saved to $saveLocation',
+          ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Done')),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Done'),
+            ),
             FilledButton(
               onPressed: () async {
                 Navigator.pop(ctx);
@@ -255,8 +272,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Export failed: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
       }
     }
   }
@@ -305,8 +323,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     setState(() => _reordering = false);
                     await _save();
                   },
-                  child: const Text('Done',
-                      style: TextStyle(color: Colors.white, fontSize: 16)),
+                  child: const Text(
+                    'Done',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
                 ),
               ]
             : [
@@ -383,9 +403,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   Widget _reorderList() => ReorderableListView.builder(
         padding: const EdgeInsets.all(8),
         itemCount: _book.pages.length,
-        onReorder: (oldIndex, newIndex) {
+        onReorderItem: (oldIndex, newIndex) {
           setState(() {
-            if (newIndex > oldIndex) newIndex -= 1;
             final item = _book.pages.removeAt(oldIndex);
             _book.pages.insert(newIndex, item);
           });
@@ -396,11 +415,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             key: ValueKey('reorder_$i${page.photoUrl}'),
             margin: const EdgeInsets.symmetric(vertical: 4),
             child: ListTile(
-              leading: SizedBox(
-                width: 48,
-                height: 60,
-                child: _thumb(page),
-              ),
+              leading: SizedBox(width: 48, height: 60, child: _thumb(page)),
               title: Text('Page ${i + 1}'),
               subtitle: page.hasText
                   ? const Text('Has text', style: TextStyle(fontSize: 12))
@@ -413,8 +428,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   Widget _thumb(PageItem page) {
     if (page.isRemote) {
-      return CachedNetworkImage(
-          imageUrl: page.photoUrl, fit: BoxFit.cover);
+      return CachedNetworkImage(imageUrl: page.photoUrl, fit: BoxFit.cover);
     }
     final f = File(page.photoUrl);
     return f.existsSync()
@@ -449,17 +463,21 @@ class _PageTile extends StatelessWidget {
         fit: BoxFit.cover,
         placeholder: (_, __) => Container(
           color: Colors.grey[200],
-          child: const Center(
-              child: CircularProgressIndicator(strokeWidth: 2)),
+          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
         ),
         errorWidget: (_, __, ___) => Container(
-            color: Colors.grey[300], child: const Icon(Icons.broken_image)),
+          color: Colors.grey[300],
+          child: const Icon(Icons.broken_image),
+        ),
       );
     }
     final f = File(page.photoUrl);
     return f.existsSync()
         ? Image.file(f, fit: BoxFit.cover)
-        : Container(color: Colors.grey[300], child: const Icon(Icons.broken_image));
+        : Container(
+            color: Colors.grey[300],
+            child: const Icon(Icons.broken_image),
+          );
   }
 
   @override
@@ -469,46 +487,52 @@ class _PageTile extends StatelessWidget {
       onLongPress: onLongPress,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Stack(fit: StackFit.expand, children: [
-          _photo(),
-          // Page number badge
-          Positioned(
-            top: 6,
-            left: 6,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text('Page ${index + 1}',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold)),
-            ),
-          ),
-          // "Has text" indicator
-          if (page.hasText)
-            const Positioned(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _photo(),
+            // Page number badge
+            Positioned(
               top: 6,
-              right: 6,
-              child: Icon(Icons.text_snippet, color: Colors.white, size: 20),
-            ),
-          // Selection overlay
-          if (selecting)
-            Container(
-              color: selected
-                  ? const Color(0xFF1565C0).withValues(alpha: 0.35)
-                  : Colors.black12,
-              alignment: Alignment.bottomRight,
-              padding: const EdgeInsets.all(6),
-              child: Icon(
-                selected ? Icons.check_circle : Icons.circle_outlined,
-                color: Colors.white,
+              left: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Page ${index + 1}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-        ]),
+            // "Has text" indicator
+            if (page.hasText)
+              const Positioned(
+                top: 6,
+                right: 6,
+                child: Icon(Icons.text_snippet, color: Colors.white, size: 20),
+              ),
+            // Selection overlay
+            if (selecting)
+              Container(
+                color: selected
+                    ? const Color(0xFF1565C0).withValues(alpha: 0.35)
+                    : Colors.black12,
+                alignment: Alignment.bottomRight,
+                padding: const EdgeInsets.all(6),
+                child: Icon(
+                  selected ? Icons.check_circle : Icons.circle_outlined,
+                  color: Colors.white,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

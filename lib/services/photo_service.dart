@@ -45,7 +45,9 @@ class PhotoService {
   static Future<void> _deleteRecursive(Reference ref) async {
     final result = await ref.listAll();
     for (final item in result.items) {
-      try { await item.delete(); } catch (_) {}
+      try {
+        await item.delete();
+      } catch (_) {}
     }
     for (final prefix in result.prefixes) {
       await _deleteRecursive(prefix);

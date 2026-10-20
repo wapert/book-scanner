@@ -29,6 +29,13 @@
             {
               "client_id": "677302127068-i28hol54dorndahedkins07e04p7cd6o.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "677302127068-6ll7q8ghtjql22mu9n8df4fuvqkqu7io.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bookscanner.bookScanner"
+              }
             }
           ]
         }

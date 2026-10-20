@@ -21,7 +21,9 @@ class AuthService {
   static Future<void> reauthenticate(String password) async {
     final user = _auth.currentUser!;
     final cred = EmailAuthProvider.credential(
-        email: user.email!, password: password);
+      email: user.email!,
+      password: password,
+    );
     await user.reauthenticateWithCredential(cred);
   }
 

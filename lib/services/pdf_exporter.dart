@@ -15,11 +15,13 @@ class PdfExporter {
       final bytes = await _loadBytes(path);
       if (bytes == null) continue;
 
-      doc.addPage(pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        margin: pw.EdgeInsets.zero,
-        build: (_) => pw.Image(pw.MemoryImage(bytes), fit: pw.BoxFit.contain),
-      ));
+      doc.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: pw.EdgeInsets.zero,
+          build: (_) => pw.Image(pw.MemoryImage(bytes), fit: pw.BoxFit.contain),
+        ),
+      );
     }
 
     final safeName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_').trim();
